@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Order Visualization</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+        }
+
+        /* Coffee Cup Visualization */
+        .cup-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .cup-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .cup {
+            position: relative;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Whipped cream */
+        .whipped-cream {
+            width: 80px;
+            height: 40px;
+            background: #FFFACD;
+            border-radius: 50% 50% 0 0;
+            position: relative;
+            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .whipped-cream.show {
+            display: block;
+        }
+
+        .whipped-cream::before,
+        .whipped-cream::after {
+            content: '';
+            position: absolute;
+            background: #FFFACD;
+            border-radius: 50%;
+        }
+
+        .whipped-cream::before {
+            width: 30px;
+            height: 30px;
+            top: -10px;
+            left: 10px;
+        }
+
+        .whipped-cream::after {
+            width: 25px;
+            height: 25px;
+            top: -8px;
+            right: 15px;
+        }
+
+        /* Cup body */
+        .cup-body {
+            width: 100px;
+            background: linear-gradient(to bottom, #D2691E 0%, #8B4513 100%);
+            border-radius: 0 0 15px 15px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .cup-body.small {
+            height: 120px;
+        }
+
+        .cup-body.medium {
+            height: 160px;
+        }
+
+        .cup-body.large {
+            height: 200px;
+        }
+
+        /* Liquid fill */
+        .liquid {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #6F4E37;
+            border-radius: 0 0 15px 15px;
+            transition: all 0.5s ease;
+        }
+
+        .liquid.small {
+            height: 100px;
+        }
+
+        .liquid.medium {
+            height: 140px;
+        }
+
+        .liquid.large {
+            height: 180px;
+        }
+
+        /* Foam layer */
+        .foam {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(to bottom, #F5E6D3 0%, #E8D4B8 100%);
+            border-radius: 3px 3px 0 0;
+        }
+
+        /* Cup handle */
+        .handle {
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 40px;
+            border: 8px solid #8B4513;
+            border-left: none;
+            border-radius: 0 20px 20px 0;
+        }
+
+        /* Cup sleeve */
+        .sleeve {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: #654321;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        /* Receipt */
+        .receipt {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 350px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .receipt-header {
+            text-align: center;
+            border-bottom: 2px dashed #333;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .shop-name {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .shop-tagline {
+            font-size: 12px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .order-details {
+            margin: 20px 0;
+        }
+
+        .order-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px dotted #ddd;
+        }
+
+        .order-label {
+            font-weight: bold;
+            color: #555;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+
+        .order-value {
+            color: #333;
+            font-size: 14px;
+        }
+
+        .extras-list {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+
+        .extra-item {
+            color: #666;
+            font-size: 12px;
+            margin: 5px 0;
+        }
+
+        .extra-item::before {
+            content: "• ";
+            color: #8B4513;
+        }
+
+        .receipt-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px dashed #333;
+        }
+
+        .customer-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #8B4513;
+            margin-bottom: 10px;
+        }
+
+        .thank-you {
+            font-size: 14px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .timestamp {
+            font-size: 10px;
+            color: #999;
+            margin-top: 10px;
+        }
+
+        /* Demo controls */
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .controls h3 {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+        }
+
+        .controls label {
+            display: block;
+            margin: 10px 0 5px 0;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .controls select,
+        .controls input {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .controls button {
+            width: 100%;
+            padding: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .controls button:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <!-- Demo Controls -->
+    <div class="controls">
+        <h3>Order Demo</h3>
+        <label>Drink Type:</label>
+        <select id="drinkType">
+            <option value="latte">Latte</option>
+            <option value="cappuccino">Cappuccino</option>
+            <option value="americano">Americano</option>
+            <option value="mocha">Mocha</option>
+            <option value="espresso">Espresso</option>
+        </select>
+
+        <label>Size:</label>
+        <select id="size">
+            <option value="small">Small</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+        </select>
+
+        <label>Milk:</label>
+        <select id="milk">
+            <option value="whole milk">Whole Milk</option>
+            <option value="oat milk">Oat Milk</option>
+            <option value="almond milk">Almond Milk</option>
+            <option value="soy milk">Soy Milk</option>
+        </select>
+
+        <label>Customer Name:</label>
+        <input type="text" id="customerName" value="Alex" />
+
+        <label>Extras:</label>
+        <div>
+            <input type="checkbox" id="whippedCream" value="whipped cream" checked />
+            <label for="whippedCream" style="display: inline; margin: 0;">Whipped Cream</label>
+        </div>
+        <div>
+            <input type="checkbox" id="extraShot" value="extra shot" />
+            <label for="extraShot" style="display: inline; margin: 0;">Extra Shot</label>
+        </div>
+        <div>
+            <input type="checkbox" id="vanilla" value="vanilla syrup" />
+            <label for="vanilla" style="display: inline; margin: 0;">Vanilla Syrup</label>
+        </div>
+
+        <button onclick="updateOrder()">Update Order</button>
+    </div>
+
+    <div class="container">
+        <!-- Coffee Cup Visualization -->
+        <div class="cup-container">
+            <div class="cup-title">Your Order</div>
+            <div class="cup">
+                <div class="whipped-cream" id="whippedCream"></div>
+                <div class="cup-body" id="cupBody">
+                    <div class="liquid" id="liquid">
+                        <div class="foam"></div>
+                    </div>
+                    <div class="handle"></div>
+                    <div class="sleeve" id="sleeve">☕</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Receipt -->
+        <div class="receipt">
+            <div class="receipt-header">
+                <div class="shop-name">☕ ARTISAN BREW</div>
+                <div class="shop-tagline">Crafted with Love</div>
+            </div>
+
+            <div class="order-details">
+                <div class="order-row">
+                    <span class="order-label">Drink:</span>
+                    <span class="order-value" id="receiptDrink">Latte</span>
+                </div>
+                <div class="order-row">
+                    <span class="order-label">Size:</span>
+                    <span class="order-value" id="receiptSize">Medium</span>
+                </div>
+                <div class="order-row">
+                    <span class="order-label">Milk:</span>
+                    <span class="order-value" id="receiptMilk">Oat Milk</span>
+                </div>
+                <div class="order-row">
+                    <span class="order-label">Extras:</span>
+                    <div id="receiptExtras" class="extras-list">
+                        <div class="extra-item">Whipped Cream</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="receipt-footer">
+                <div class="customer-name" id="receiptName">Alex</div>
+                <div class="thank-you">Thank you for your order!</div>
+                <div class="timestamp" id="timestamp"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateOrder() {
+            // Get form values
+            const drinkType = document.getElementById('drinkType').value;
+            const size = document.getElementById('size').value;
+            const milk = document.getElementById('milk').value;
+            const customerName = document.getElementById('customerName').value;
+
+            // Get extras
+            const extras = [];
+            if (document.getElementById('whippedCream').checked) extras.push('Whipped Cream');
+            if (document.getElementById('extraShot').checked) extras.push('Extra Shot');
+            if (document.getElementById('vanilla').checked) extras.push('Vanilla Syrup');
+
+            // Update cup visualization
+            const cupBody = document.getElementById('cupBody');
+            const liquid = document.getElementById('liquid');
+            const whippedCream = document.getElementById('whippedCream');
+
+            // Update size
+            cupBody.className = `cup-body ${size}`;
+            liquid.className = `liquid ${size}`;
+
+            // Update whipped cream visibility
+            if (extras.includes('Whipped Cream')) {
+                whippedCream.classList.add('show');
+            } else {
+                whippedCream.classList.remove('show');
+            }
+
+            // Update receipt
+            document.getElementById('receiptDrink').textContent = 
+                drinkType.charAt(0).toUpperCase() + drinkType.slice(1);
+            document.getElementById('receiptSize').textContent = 
+                size.charAt(0).toUpperCase() + size.slice(1);
+            document.getElementById('receiptMilk').textContent = milk;
+            document.getElementById('receiptName').textContent = customerName;
+
+            // Update extras list
+            const extrasContainer = document.getElementById('receiptExtras');
+            if (extras.length > 0) {
+                extrasContainer.innerHTML = extras
+                    .map(extra => `<div class="extra-item">${extra}</div>`)
+                    .join('');
+            } else {
+                extrasContainer.innerHTML = '<div class="extra-item">None</div>';
+            }
+
+            // Update timestamp
+            const now = new Date();
+            document.getElementById('timestamp').textContent = now.toLocaleString();
+        }
+
+        // Initialize with default values
+        updateOrder();
+    </script>
+</body>
+</html>
